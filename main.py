@@ -1,7 +1,6 @@
 import logging
 import os
-from telegram import Update, InputFile
-from telegram import ParseMode  # Correct import for ParseMode
+from telegram import Update, InputFile, ParseMode  # Correct import for ParseMode
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ConversationHandler
 import uuid
 
@@ -137,4 +136,3 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
-        
