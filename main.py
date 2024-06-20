@@ -118,13 +118,13 @@ def handle_start(update: Update, context: CallbackContext) -> None:
 
 def main() -> None:
     """Start the bot"""
-    updater = Updater(BOT_TOKEN, use_context=True)
+    updater = Updater(BOT_TOKEN)
     dispatcher = updater.dispatcher
 
     conv_handler = ConversationHandler(
-        entry_points=[MessageHandler(filters.Filters.document, handle_document)],  # Adjusted to use filters directly
+        entry_points=[MessageHandler(filters.Filters.document, handle_document)],
         states={
-            FILE_UPLOAD: [MessageHandler(filters.Filters.document, handle_document)],  # Adjusted to use filters directly
+            FILE_UPLOAD: [MessageHandler(filters.Filters.document, handle_document)],
             FILE_CONFIRMATION: [CommandHandler('done', done)],
         },
         fallbacks=[CommandHandler('start', start)],
