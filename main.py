@@ -1,7 +1,6 @@
 import logging
 import os
-from telegram import Update, InputFile
-from telegram.constants import PARSEMODE_MARKDOWN, PARSEMODE_HTML
+from telegram import Update, InputFile, ParseMode
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ConversationHandler
 import uuid
 
@@ -42,7 +41,7 @@ def start(update: Update, context: CallbackContext) -> None:
             chat_id=update.message.chat_id,
             photo=START_THUMBNAIL_URL,
             caption=START_MESSAGE,
-            parse_mode=PARSEMODE_HTML  # Using PARSEMODE_HTML for HTML formatting
+            parse_mode=ParseMode.HTML  # Using ParseMode.HTML for HTML formatting
         )
     else:
         update.message.reply_text('You are not authorized to use this bot.')
@@ -137,4 +136,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
-        
+    
