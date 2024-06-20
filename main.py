@@ -1,8 +1,7 @@
 import logging
 import os
-from telegram import Update, InputFile
-from telegram.constants import ParseMode
-from telegram.ext import Updater, CommandHandler, MessageHandler, filters, CallbackContext, ConversationHandler
+from telegram import Update, InputFile, ParseMode
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ConversationHandler
 import uuid
 
 # Enable logging
@@ -13,21 +12,23 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# Retrieve bot token and channel ID from environment variables or directly use them
-BOT_TOKEN = os.getenv('BOT_TOKEN', '7167327959:AAFJ25AIsO9olQrSzV2OcM0YqY7yUzWekDQ')
-CHANNEL_ID = os.getenv('CHANNEL_ID', '-1001329275814')
-
-# Owners
-OWNERS = [6804487024, 930652019]
+# Retrieve bot token, channel ID, and owner IDs from environment variables or directly use them
+BOT_TOKEN = os.getenv('BOT_TOKEN', 'YOUR_BOT_TOKEN')
+CHANNEL_ID = os.getenv('CHANNEL_ID', 'YOUR_CHANNEL_ID')
+OWNERS = [6804487024, 930652019]  # Replace with your actual owner IDs
 
 # Dictionary to store file references with unique IDs
 file_store = {}
 
-START_THUMBNAIL_URL = "https://i.ibb.co/FbzmyMj/Whats-App-Image-2024-06-20-at-22-00-27-3fc70e42.jpg"
-START_MESSAGE = 'Hi! Send me a file or batch of files and I will store it.'
+# URL for Render web service
 RENDER_URL = "https://teamflock-file-store-bot.onrender.com"
 
+# Constants for conversation states
 FILE_UPLOAD, FILE_CONFIRMATION = range(2)
+
+# Thumbnail and start message
+START_THUMBNAIL_URL = "https://i.ibb.co/FbzmyMj/Whats-App-Image-2024-06-20-at-22-00-27-3fc70e42.jpg"
+START_MESSAGE = 'Hi! Send me a file or batch of files and I will store it.'
 
 def start(update: Update, context: CallbackContext) -> None:
     """Send a welcome message with a thumbnail and start the bot"""
@@ -43,7 +44,7 @@ def start(update: Update, context: CallbackContext) -> None:
     else:
         update.message.reply_text('You are not authorized to use this bot.')
 
-def handle_document(update: Update, context: CallbackContext) -> None:
+def handle_document(update: Update, context: CallbackContext) -> int:
     """Handle document uploads from users"""
     user_id = update.message.from_user.id
     if user_id in OWNERS:
@@ -79,11 +80,14 @@ def done(update: Update, context: CallbackContext) -> None:
                 caption=file.file_name
             )
         
-        # Generate a link to share
-        link = f'https://t.me/{context.bot.username}?start={unique_id}'
+        # Generate links to share
+        bot_link = f'https://t.me/{context.bot.username}?start={unique_id}'
+        render_link = f'{RENDER_URL}/{unique_id}'
+        
         update.message.reply_text(
-            f'Files stored successfully! Share this link to access the files: {link}\n'
-            f'You can also access the files via: {RENDER_URL}/{unique_id}'
+            f'Files stored successfully! Share these links to access the files:\n'
+            f'Telegram Bot: {bot_link}\n'
+            f'Render: {render_link}'
         )
         
         # Clear user data
@@ -110,32 +114,23 @@ def handle_start(update: Update, context: CallbackContext) -> None:
 
 def main() -> None:
     """Start the bot"""
-    # Create the Updater and pass it your bot's token.
-    updater = Updater(BOT_TOKEN)
-
-    # Get the dispatcher to register handlers
+    updater = Updater(BOT_TOKEN, use_context=True)
     dispatcher = updater.dispatcher
 
-    # Add conversation handler with the states FILE_UPLOAD and FILE_CONFIRMATION
     conv_handler = ConversationHandler(
-        entry_points=[MessageHandler(filters.Document.ALL, handle_document)],
+        entry_points=[MessageHandler(Filters.document, handle_document)],
         states={
-            FILE_UPLOAD: [MessageHandler(filters.Document.ALL, handle_document)],
+            FILE_UPLOAD: [MessageHandler(Filters.document, handle_document)],
             FILE_CONFIRMATION: [CommandHandler('done', done)],
         },
         fallbacks=[CommandHandler('start', start)],
     )
-    
+
     dispatcher.add_handler(conv_handler)
     dispatcher.add_handler(CommandHandler("start", handle_start, pass_args=True))
-    
-    # Start the Bot
-    updater.start_polling()
 
-    # Run the bot until you press Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT
+    updater.start_polling()
     updater.idle()
 
 if __name__ == '__main__':
     main()
-    
