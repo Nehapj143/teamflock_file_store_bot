@@ -3,7 +3,8 @@ import os
 import asyncio
 from telegram import Update, InputFile, Bot
 from telegram.constants import ParseMode  # Correct import for ParseMode
-from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, Filters, CallbackContext
+from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, CallbackContext
+from telegram.ext.filters import Filters  # Correct import for Filters
 import uuid
 
 # Enable logging
@@ -15,8 +16,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Replace with your specific bot token and channel ID
-BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"
-CHANNEL_ID = "YOUR_CHANNEL_ID_HERE"
+BOT_TOKEN = "7167327959:AAFJ25AIsO9olQrSzV2OcM0YqY7yUzWekDQ"
+CHANNEL_ID = "-1001329275814"
 
 # Owners
 OWNERS = [6804487024, 930652019]
@@ -141,4 +142,4 @@ async def main() -> None:
 
 if __name__ == '__main__':
     asyncio.run(main())
-        
+    
