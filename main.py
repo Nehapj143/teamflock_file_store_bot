@@ -11,9 +11,10 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 TOKEN = '7167327959:AAFJ25AIsO9olQrSzV2OcM0YqY7yUzWekDQ'
 CHANNEL_ID = '-1001329275814'
 LOG_CHANNEL_ID = '-1002035396400'
-GOFIL.IO_ACCOUNT_ID = 'f6f34dc8-c55c-4d4c-b272-0aaad3820dd9'
-GOFIL.IO_API_KEY = 'xdqmdwlfDftnNGxVuDlA2WZncahb14Dv'
+GOFILE_ACCOUNT_ID = 'f6f34dc8-c55c-4d4c-b272-0aaad3820dd9'
+GOFILE_API_KEY = 'xdqmdwlfDftnNGxVuDlA2WZncahb14Dv'
 
+# Conversation states
 FILE_UPLOAD, FILE_CONFIRM, LINK_SHARE = range(3)
 
 def start(update, context):
