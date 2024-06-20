@@ -1,140 +1,75 @@
 import logging
-import asyncio
-from telegram import Bot, Update
-from telegram.constants import ParseMode
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ConversationHandler
-from telegram.ext import filters  # Correct import for Filters in MessageHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler
+import os
+import uuid
+import time
 
-# Enable logging
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
+logging.basicConfig(level=logging.INFO)
 
-logger = logging.getLogger(__name__)
+TOKEN = '7167327959:AAFJ25AIsO9olQrSzV2OcM0YqY7yUzWekDQ'
+CHANNEL_ID = '-1001329275814'
 
-# Replace with your specific bot token and channel ID
-BOT_TOKEN = "7167327959:AAFJ25AIsO9olQrSzV2OcM0YqY7yUzWekDQ"
-CHANNEL_ID = "-1001329275814"
+FILE_UPLOAD, FILE_CONFIRM, LINK_SHARE = range(3)
 
-# Owners
-OWNERS = [6804487024, 930652019]
+def start(update, context):
+    update.message.reply_text('Welcome! Please upload a file.')
+    return FILE_UPLOAD
 
-# Dictionary to store file references with unique IDs
-file_store = {}
+def handle_document(update, context):
+    file = update.message.document
+    file_id = file.file_id
+    file_unique_id = str(uuid.uuid4())
+    context.user_data['file_id'] = file_id
+    context.user_data['file_unique_id'] = file_unique_id
+    update.message.reply_text('File uploaded successfully! Please confirm to generate a link.')
+    return FILE_CONFIRM
 
-# URL for Render web service
-RENDER_URL = "https://teamflock-file-store-bot.onrender.com"
+def done(update, context):
+    file_id = context.user_data['file_id']
+    file_unique_id = context.user_data['file_unique_id']
+    # Store file data in the channel permanently
+    context.bot.send_document(chat_id=CHANNEL_ID, document=file_id)
+    update.message.reply_text(f'File link: https://example.com/{file_unique_id}')
+    update.message.reply_text('Warning: Your conversation data will be deleted in 30 minutes. Please forward the file to another location to keep it permanently.')
+    return ConversationHandler.END
 
-# Constants for conversation states
-FILE_UPLOAD, FILE_CONFIRMATION = range(2)
-
-# Thumbnail and start message
-START_THUMBNAIL_URL = "https://i.ibb.co/FbzmyMj/Whats-App-Image-2024-06-20-at-22-00-27-3fc70e42.jpg"
-START_MESSAGE = 'Hi! Send me a file or batch of files and I will store it.'
-
-async def start(update: Update, context: CallbackContext) -> None:
-    """Send a welcome message with a thumbnail and start the bot"""
-    user_id = update.message.from_user.id
-    if user_id in OWNERS:
-        # Send the thumbnail image
-        await context.bot.send_photo(
-            chat_id=update.message.chat_id,
-            photo=START_THUMBNAIL_URL,
-            caption=START_MESSAGE,
-            parse_mode=ParseMode.HTML  # Using ParseMode.HTML for HTML formatting
-        )
+def handle_start(update, context):
+    args = update.message.text.split()
+    if len(args) > 1:
+        file_unique_id = args[1]
+        # Retrieve file from the channel based on unique ID and send it back to the user
+        context.bot.forward_message(chat_id=update.effective_chat.id, from_chat_id=CHANNEL_ID, message_id=file_unique_id)
     else:
-        await update.message.reply_text('You are not authorized to use this bot.')
+        update.message.reply_text('Invalid command. Please use /start <file_unique_id> to retrieve a file.')
+    return ConversationHandler.END
 
-async def handle_document(update: Update, context: CallbackContext) -> int:
-    """Handle document uploads from users"""
-    user_id = update.message.from_user.id
-    if user_id in OWNERS:
-        if 'files' not in context.user_data:
-            context.user_data['files'] = []
-        
-        # Get the file from the update and store it in user data
-        file = update.message.document
-        context.user_data['files'].append(file)
-        
-        await update.message.reply_text('File received! Send more files or use /done to finish uploading.')
-        return FILE_UPLOAD
-    else:
-        await update.message.reply_text('You are not authorized to use this bot.')
+def delete_conversation_data(context):
+    # Delete conversation data after 30 minutes
+    time.sleep(1800)  # 30 minutes
+    context.user_data.clear()
 
-async def done(update: Update, context: CallbackContext) -> None:
-    """Finalize file upload and generate a unique link"""
-    user_id = update.message.from_user.id
-    if user_id in OWNERS:
-        if 'files' not in context.user_data or not context.user_data['files']:
-            await update.message.reply_text('No files to store.')
-            return
-        
-        # Generate a unique ID for this batch of files
-        unique_id = str(uuid.uuid4())
-        file_store[unique_id] = context.user_data['files']
-        
-        # Send the files to the channel
-        for file in context.user_data['files']:
-            await context.bot.send_document(
-                chat_id=CHANNEL_ID, 
-                document=file.file_id,
-                caption=file.file_name
-            )
-        
-        # Generate links to share
-        bot_link = f'https://t.me/{context.bot.username}?start={unique_id}'
-        render_link = f'{RENDER_URL}/{unique_id}'
-        
-        await update.message.reply_text(
-            f'Files stored successfully! Share these links to access the files:\n'
-            f'Telegram Bot: {bot_link}\n'
-            f'Render: {render_link}'
-        )
-        
-        # Clear user data
-        context.user_data.clear()
-        return ConversationHandler.END
-    else:
-        await update.message.reply_text('You are not authorized to use this bot.')
+def main():
+    updater = Updater(TOKEN, use_context=True)
 
-async def handle_start(update: Update, context: CallbackContext) -> None:
-    """Handle the /start command with optional parameters"""
-    if context.args:
-        unique_id = context.args[0]
-        if unique_id in file_store:
-            files = file_store[unique_id]
-            for file in files:
-                await update.message.reply_document(
-                    file.file_id,
-                    caption=file.file_name
-                )
-        else:
-            await update.message.reply_text('Invalid or expired link.')
-    else:
-        await update.message.reply_text('Hi! Send me a file or batch of files and I will store it.')
-
-async def main() -> None:
-    """Start the bot"""
-    bot = Bot(token=BOT_TOKEN)
-    updater = Updater(bot=bot)
-    dispatcher = updater.dispatcher
+    dp = updater.dispatcher
 
     conv_handler = ConversationHandler(
-        entry_points=[MessageHandler(filters.Filters.document, handle_document)],
+        entry_points=[CommandHandler('start', start)],
         states={
-            FILE_UPLOAD: [MessageHandler(filters.Filters.document, handle_document)],
-            FILE_CONFIRMATION: [CommandHandler('done', done)],
+            FILE_UPLOAD: [MessageHandler(Filters.document, handle_document)],
+            FILE_CONFIRM: [MessageHandler(Filters.text, done)],
         },
-        fallbacks=[CommandHandler('start', handle_start, pass_args=True)],
+        fallbacks=[CommandHandler('start', handle_start)]
     )
 
-    dispatcher.add_handler(conv_handler)
-    dispatcher.add_handler(CommandHandler("start", handle_start, pass_args=True))
+    dp.add_handler(conv_handler)
 
-    await updater.start_polling()
+    # Start a separate thread to delete conversation data after 30 minutes
+    import threading
+    threading.Thread(target=delete_conversation_data, args=(updater.dispatcher.context,)).start()
+
+    updater.start_polling()
     updater.idle()
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
