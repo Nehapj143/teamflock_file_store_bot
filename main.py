@@ -1,7 +1,7 @@
 import logging
 import asyncio
 from telegram import Bot, Update
-from telegram import ParseMode  # Correct import for ParseMode
+from telegram.constants import ParseMode
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ConversationHandler
 from telegram.ext import filters  # Correct import for Filters in MessageHandler
 
