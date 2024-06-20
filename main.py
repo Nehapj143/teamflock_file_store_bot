@@ -81,7 +81,11 @@ def main():
     dp = updater.dispatcher
 
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', start)],
-        states={
-            FILE_UPLOAD: [MessageHandler(filters.Document, handle_document)],
-            FILE_CONFIRM: [MessageHandler(filters.Text
+    entry_points=[CommandHandler('start', start)],
+    states={
+        FILE_UPLOAD: [MessageHandler(filters.Document, handle_document)],
+        FILE_CONFIRM: [MessageHandler(filters.Text, done)],
+    },
+    fallbacks=[CommandHandler('start', start)]
+)
+
