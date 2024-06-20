@@ -2,10 +2,11 @@ import logging
 import re
 from telegram.ext import Updater, CommandHandler, MessageHandler, filters, ConversationHandler
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', filename='user_data.log', filemode='a')
 
 TOKEN = '7167327959:AAFJ25AIsO9olQrSzV2OcM0YqY7yUzWekDQ'
 CHANNEL_ID = '-1001329275814'
+LOG_CHANNEL_ID = '-1002035396400'
 
 FILE_UPLOAD, FILE_CONFIRM, LINK_SHARE = range(3)
 
@@ -35,6 +36,12 @@ def done(update, context):
         context.bot.send_document(chat_id=CHANNEL_ID, document=file_id)
     update.message.reply_text(f'File link: https://example.com/{file_unique_id}')
     update.message.reply_text('Warning: Your conversation data will be deleted in 30 minutes. Please forward the file to another location to keep it permanently.')
+    
+    # Log user data to the log channel
+    log_message = f'User {update.effective_user.username} uploaded a file with ID {file_unique_id}'
+    logging.info(log_message)
+    context.bot.send_message(chat_id=LOG_CHANNEL_ID, text=log_message)
+    
     return ConversationHandler.END
 
 def handle_start(update, context):
@@ -53,7 +60,7 @@ def delete_conversation_data(context):
     context.user_data.clear()
 
 def main():
-    updater = Updater(TOKEN, use_context=True)
+    updater = Updater(TOKEN)
 
     dp = updater.dispatcher
 
@@ -77,4 +84,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    
