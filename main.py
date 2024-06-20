@@ -1,6 +1,7 @@
 import logging
 import os
-from telegram import Update, InputFile, ParseMode  # Correct import for ParseMode
+from telegram import Update, InputFile
+from telegram.constants import ParseMode  # Import ParseMode from telegram.constants
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ConversationHandler
 import uuid
 
