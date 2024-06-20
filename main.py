@@ -2,7 +2,7 @@ import logging
 import os
 from telegram import Update, InputFile
 from telegram.constants import ParseMode
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ConversationHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, filters, CallbackContext, ConversationHandler
 import uuid
 
 # Enable logging
@@ -25,6 +25,7 @@ file_store = {}
 
 START_THUMBNAIL_URL = "https://i.ibb.co/FbzmyMj/Whats-App-Image-2024-06-20-at-22-00-27-3fc70e42.jpg"
 START_MESSAGE = 'Hi! Send me a file or batch of files and I will store it.'
+RENDER_URL = "https://teamflock-file-store-bot.onrender.com"
 
 FILE_UPLOAD, FILE_CONFIRMATION = range(2)
 
@@ -81,7 +82,8 @@ def done(update: Update, context: CallbackContext) -> None:
         # Generate a link to share
         link = f'https://t.me/{context.bot.username}?start={unique_id}'
         update.message.reply_text(
-            f'Files stored successfully! Share this link to access the files: {link}'
+            f'Files stored successfully! Share this link to access the files: {link}\n'
+            f'You can also access the files via: {RENDER_URL}/{unique_id}'
         )
         
         # Clear user data
@@ -116,9 +118,9 @@ def main() -> None:
 
     # Add conversation handler with the states FILE_UPLOAD and FILE_CONFIRMATION
     conv_handler = ConversationHandler(
-        entry_points=[MessageHandler(Filters.document, handle_document)],
+        entry_points=[MessageHandler(filters.Document.ALL, handle_document)],
         states={
-            FILE_UPLOAD: [MessageHandler(Filters.document, handle_document)],
+            FILE_UPLOAD: [MessageHandler(filters.Document.ALL, handle_document)],
             FILE_CONFIRMATION: [CommandHandler('done', done)],
         },
         fallbacks=[CommandHandler('start', start)],
