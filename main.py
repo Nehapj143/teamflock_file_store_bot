@@ -3,7 +3,7 @@ import asyncio
 from telegram import Bot, Update
 from telegram.constants import ParseMode
 from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, CallbackContext
-from telegram.ext.filters import filters  # Import filters directly from telegram.ext.filters
+from telegram.ext.filters import Filters  # Import Filters directly from telegram.ext.filters
 
 # Enable logging
 logging.basicConfig(
