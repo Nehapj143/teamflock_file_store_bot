@@ -1,6 +1,7 @@
 import logging
 import os
-from telegram import Update, InputFile, constants
+from telegram import Update, InputFile
+from telegram.constants import ParseMode
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ConversationHandler
 import uuid
 
@@ -36,7 +37,7 @@ def start(update: Update, context: CallbackContext) -> None:
             chat_id=update.message.chat_id,
             photo=START_THUMBNAIL_URL,
             caption=START_MESSAGE,
-            parse_mode=constants.ParseMode.HTML
+            parse_mode=ParseMode.HTML
         )
     else:
         update.message.reply_text('You are not authorized to use this bot.')
