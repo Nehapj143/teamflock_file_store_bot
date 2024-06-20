@@ -1,5 +1,6 @@
 import logging
 import re
+import requests
 from telegram.ext import Updater, CommandHandler, MessageHandler, filters, ConversationHandler
 import uuid
 import time
@@ -10,6 +11,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 TOKEN = '7167327959:AAFJ25AIsO9olQrSzV2OcM0YqY7yUzWekDQ'
 CHANNEL_ID = '-1001329275814'
 LOG_CHANNEL_ID = '-1002035396400'
+GOFIL.IO_ACCOUNT_ID = 'f6f34dc8-c55c-4d4c-b272-0aaad3820dd9'
+GOFIL.IO_API_KEY = 'xdqmdwlfDftnNGxVuDlA2WZncahb14Dv'
 
 FILE_UPLOAD, FILE_CONFIRM, LINK_SHARE = range(3)
 
@@ -37,7 +40,17 @@ def done(update, context):
         context.bot.send_document(chat_id=CHANNEL_ID, document=file_id, caption=caption)
     else:
         context.bot.send_document(chat_id=CHANNEL_ID, document=file_id)
+    
+    # Upload file to gofile.io
+    file_info = context.bot.get_file(file_id)
+    file_url = f'https://api.telegram.org/file/bot{TOKEN}/{file_info.file_path}'
+    response = requests.get(file_url, stream=True)
+    file_name = file_info.file_name
+    gofile_response = requests.post('https://api.gofile.io/uploadFile', files={'file': (file_name, response.raw)}, data={'token': GOFIL.IO_API_KEY, 'account_id': GOFIL.IO_ACCOUNT_ID})
+    gofile_link = gofile_response.json()['data']['link']
+    
     update.message.reply_text(f'File link: https://example.com/{file_unique_id}')
+    update.message.reply_text(f'Gofile link: {gofile_link}')
     update.message.reply_text('Warning: Your conversation data will be deleted in 30 minutes. Please forward the file to another location to keep it permanently.')
     
     # Log user data to the log channel
@@ -63,7 +76,7 @@ def delete_conversation_data(context):
     context.user_data.clear()
 
 def main():
-    updater = Updater(TOKEN, base_url='https://api.telegram.org/bot')
+    updater = Updater(TOKEN)
 
     dp = updater.dispatcher
 
@@ -71,20 +84,4 @@ def main():
         entry_points=[CommandHandler('start', start)],
         states={
             FILE_UPLOAD: [MessageHandler(filters.Document, handle_document)],
-            FILE_CONFIRM: [MessageHandler(filters.Text, done)],
-        },
-        fallbacks=[CommandHandler('start', handle_start)]
-    )
-
-    dp.add_handler(conv_handler)
-
-    # Start a separate thread to delete conversation data after 30 minutes
-    import threading
-    threading.Thread(target=delete_conversation_data, args=(updater.dispatcher.context,)).start()
-
-    updater.start_polling()
-    updater.idle()
-
-if __name__ == '__main__':
-    main()
-    
+            FILE_CONFIRM: [MessageHandler(filters.Text
