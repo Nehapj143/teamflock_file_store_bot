@@ -1,12 +1,15 @@
 import logging
 import re
 from telegram.ext import Updater, CommandHandler, MessageHandler, filters, ConversationHandler
+import uuid
+import time
+import threading
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', filename='user_data.log', filemode='a')
 
-TOKEN = '7167327959:AAFJ25AIsO9olQrSzV2OcM0YqY7yUzWekDQ'
-CHANNEL_ID = '-1001329275814'
-LOG_CHANNEL_ID = '-1002035396400'
+TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN'
+CHANNEL_ID = '@your_channel_id'
+LOG_CHANNEL_ID = '@your_log_channel_id'
 
 FILE_UPLOAD, FILE_CONFIRM, LINK_SHARE = range(3)
 
@@ -60,7 +63,7 @@ def delete_conversation_data(context):
     context.user_data.clear()
 
 def main():
-    updater = Updater(TOKEN)
+    updater = Updater(TOKEN, base_url='https://api.telegram.org/bot')
 
     dp = updater.dispatcher
 
@@ -84,3 +87,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    
