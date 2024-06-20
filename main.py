@@ -1,7 +1,6 @@
 import logging
 import os
-from telegram import Update, InputFile
-from telegram.constants import ParseMode
+from telegram import Update, InputFile, constants
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ConversationHandler
 import uuid
 
@@ -14,8 +13,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Retrieve bot token and channel ID from environment variables or directly use them
-BOT_TOKEN = os.getenv('BOT_TOKEN', 'YOUR_BOT_TOKEN_HERE')
-CHANNEL_ID = os.getenv('CHANNEL_ID', 'YOUR_CHANNEL_ID_HERE')
+BOT_TOKEN = os.getenv('BOT_TOKEN', '7167327959:AAFJ25AIsO9olQrSzV2OcM0YqY7yUzWekDQ')
+CHANNEL_ID = os.getenv('CHANNEL_ID', '-1001329275814')
 
 # Owners
 OWNERS = [6804487024, 930652019]
@@ -26,6 +25,8 @@ file_store = {}
 START_THUMBNAIL_URL = "https://i.ibb.co/FbzmyMj/Whats-App-Image-2024-06-20-at-22-00-27-3fc70e42.jpg"
 START_MESSAGE = 'Hi! Send me a file or batch of files and I will store it.'
 
+FILE_UPLOAD, FILE_CONFIRMATION = range(2)
+
 def start(update: Update, context: CallbackContext) -> None:
     """Send a welcome message with a thumbnail and start the bot"""
     user_id = update.message.from_user.id
@@ -35,7 +36,7 @@ def start(update: Update, context: CallbackContext) -> None:
             chat_id=update.message.chat_id,
             photo=START_THUMBNAIL_URL,
             caption=START_MESSAGE,
-            parse_mode=ParseMode.HTML
+            parse_mode=constants.ParseMode.HTML
         )
     else:
         update.message.reply_text('You are not authorized to use this bot.')
@@ -52,6 +53,7 @@ def handle_document(update: Update, context: CallbackContext) -> None:
         context.user_data['files'].append(file)
         
         update.message.reply_text('File received! Send more files or use /done to finish uploading.')
+        return FILE_UPLOAD
     else:
         update.message.reply_text('You are not authorized to use this bot.')
 
@@ -76,13 +78,14 @@ def done(update: Update, context: CallbackContext) -> None:
             )
         
         # Generate a link to share
-        link = f'https://t.me/teamflock_file_store_bot?start={unique_id}'
+        link = f'https://t.me/{context.bot.username}?start={unique_id}'
         update.message.reply_text(
             f'Files stored successfully! Share this link to access the files: {link}'
         )
         
         # Clear user data
         context.user_data.clear()
+        return ConversationHandler.END
     else:
         update.message.reply_text('You are not authorized to use this bot.')
 
@@ -114,8 +117,8 @@ def main() -> None:
     conv_handler = ConversationHandler(
         entry_points=[MessageHandler(Filters.document, handle_document)],
         states={
-            'FILE_UPLOAD': [MessageHandler(Filters.document, handle_document)],
-            'FILE_CONFIRMATION': [CommandHandler('done', done)],
+            FILE_UPLOAD: [MessageHandler(Filters.document, handle_document)],
+            FILE_CONFIRMATION: [CommandHandler('done', done)],
         },
         fallbacks=[CommandHandler('start', start)],
     )
