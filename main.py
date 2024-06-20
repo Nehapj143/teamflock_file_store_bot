@@ -2,8 +2,7 @@ import logging
 import asyncio
 from telegram import Bot, Update
 from telegram.constants import ParseMode
-from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, CallbackContext
-from telegram.ext.filters import Filters  # Import Filters directly from telegram.ext.filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
 # Enable logging
 logging.basicConfig(
@@ -138,4 +137,3 @@ async def main() -> None:
 
 if __name__ == '__main__':
     asyncio.run(main())
-    
