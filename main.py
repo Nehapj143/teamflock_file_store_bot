@@ -1,6 +1,7 @@
 import logging
 import os
-from telegram import Update, InputFile, ParseMode
+from telegram import Update, InputFile
+from telegram import ParseMode  # Correct import for ParseMode
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ConversationHandler
 import uuid
 
@@ -13,8 +14,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Replace with your specific bot token and channel ID
-BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"
-CHANNEL_ID = "YOUR_CHANNEL_ID_HERE"
+BOT_TOKEN = "7167327959:AAFJ25AIsO9olQrSzV2OcM0YqY7yUzWekDQ"
+CHANNEL_ID = "-1001329275814"
 
 # Owners
 OWNERS = [6804487024, 930652019]
@@ -136,4 +137,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
-    
+        
