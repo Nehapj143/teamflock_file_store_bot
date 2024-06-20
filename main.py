@@ -1,6 +1,7 @@
 import logging
 import os
-from telegram import Update, InputFile, ParseMode
+from telegram import Update, InputFile
+from telegram.constants import PARSEMODE_MARKDOWN, PARSEMODE_HTML
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ConversationHandler
 import uuid
 
@@ -12,10 +13,12 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# Retrieve bot token, channel ID, and owner IDs from environment variables or directly use them
-BOT_TOKEN = os.getenv('BOT_TOKEN', 'YOUR_BOT_TOKEN')
-CHANNEL_ID = os.getenv('CHANNEL_ID', 'YOUR_CHANNEL_ID')
-OWNERS = [6804487024, 930652019]  # Replace with your actual owner IDs
+# Replace with your specific bot token and channel ID
+BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"
+CHANNEL_ID = "YOUR_CHANNEL_ID_HERE"
+
+# Owners
+OWNERS = [6804487024, 930652019]
 
 # Dictionary to store file references with unique IDs
 file_store = {}
@@ -39,7 +42,7 @@ def start(update: Update, context: CallbackContext) -> None:
             chat_id=update.message.chat_id,
             photo=START_THUMBNAIL_URL,
             caption=START_MESSAGE,
-            parse_mode=ParseMode.HTML
+            parse_mode=PARSEMODE_HTML  # Using PARSEMODE_HTML for HTML formatting
         )
     else:
         update.message.reply_text('You are not authorized to use this bot.')
@@ -134,3 +137,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
+        
