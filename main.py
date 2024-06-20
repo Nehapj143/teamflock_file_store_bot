@@ -1,9 +1,9 @@
 import logging
 import os
-from telegram import Update, InputFile
-from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackContext, ConversationHandler
-from telegram.ext import filters  # Import filters module correctly
-import uuid
+import asyncio
+from telegram import Update, InputFile, ParseMode, Bot
+from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, Filters, CallbackContext
+from queue import Queue  # Import Queue class from queue module
 
 # Enable logging
 logging.basicConfig(
@@ -37,12 +37,12 @@ def start(update: Update, context: CallbackContext) -> None:
     """Send a welcome message with a thumbnail and start the bot"""
     user_id = update.message.from_user.id
     if user_id in OWNERS:
-        # Send the thumbnail image with HTML formatting
+        # Send the thumbnail image
         context.bot.send_photo(
             chat_id=update.message.chat_id,
             photo=START_THUMBNAIL_URL,
             caption=START_MESSAGE,
-            parse_mode='HTML'  # Using ParseMode.HTML for HTML formatting
+            parse_mode=ParseMode.HTML  # Using ParseMode.HTML for HTML formatting
         )
     else:
         update.message.reply_text('You are not authorized to use this bot.')
@@ -90,8 +90,7 @@ def done(update: Update, context: CallbackContext) -> None:
         update.message.reply_text(
             f'Files stored successfully! Share these links to access the files:\n'
             f'Telegram Bot: {bot_link}\n'
-            f'Render: {render_link}',
-            parse_mode='HTML'  # Using ParseMode.HTML for HTML formatting
+            f'Render: {render_link}'
         )
         
         # Clear user data
@@ -116,15 +115,18 @@ def handle_start(update: Update, context: CallbackContext) -> None:
     else:
         update.message.reply_text('Hi! Send me a file or batch of files and I will store it.')
 
-def main() -> None:
+async def main() -> None:
     """Start the bot"""
-    updater = Updater(BOT_TOKEN)
+    bot = Bot(token=BOT_TOKEN)
+    update_queue = asyncio.Queue()  # Create an asyncio Queue for updates
+
+    updater = Updater(bot=bot, update_queue=update_queue)
     dispatcher = updater.dispatcher
 
     conv_handler = ConversationHandler(
-        entry_points=[MessageHandler(filters.Filters.document, handle_document)],
+        entry_points=[MessageHandler(Filters.document, handle_document)],
         states={
-            FILE_UPLOAD: [MessageHandler(filters.Filters.document, handle_document)],
+            FILE_UPLOAD: [MessageHandler(Filters.document, handle_document)],
             FILE_CONFIRMATION: [CommandHandler('done', done)],
         },
         fallbacks=[CommandHandler('start', start)],
@@ -133,8 +135,8 @@ def main() -> None:
     dispatcher.add_handler(conv_handler)
     dispatcher.add_handler(CommandHandler("start", handle_start, pass_args=True))
 
-    updater.start_polling()
+    await updater.start_polling()
     updater.idle()
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
