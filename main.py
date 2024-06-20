@@ -1,8 +1,6 @@
 import logging
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler
-import os
-import uuid
-import time
+import re
+from telegram.ext import Updater, CommandHandler, MessageHandler, filters, ConversationHandler
 
 logging.basicConfig(level=logging.INFO)
 
@@ -27,8 +25,14 @@ def handle_document(update, context):
 def done(update, context):
     file_id = context.user_data['file_id']
     file_unique_id = context.user_data['file_unique_id']
-    # Store file data in the channel permanently
-    context.bot.send_document(chat_id=CHANNEL_ID, document=file_id)
+    caption = update.message.caption
+    if caption:
+        # Remove unwanted text from caption
+        unwanted_text = r'(RipcrabbyAnime|www\.1TamilMV\.eu|BollyFlix|UHDMovies|vegamovies|\[Toonworld4all\]|http://thepwc\.xyz|mkvCinemas|mkvAnime|@WrestlingMultiverse|@Wrestling_Asylum|@ClipmateMovies|@Ongoing_Fair|@infinite_anime|privatemoviez|OlAM|PSA|Pahe)'
+        caption = re.sub(unwanted_text, '', caption, flags=re.IGNORECASE)
+        context.bot.send_document(chat_id=CHANNEL_ID, document=file_id, caption=caption)
+    else:
+        context.bot.send_document(chat_id=CHANNEL_ID, document=file_id)
     update.message.reply_text(f'File link: https://example.com/{file_unique_id}')
     update.message.reply_text('Warning: Your conversation data will be deleted in 30 minutes. Please forward the file to another location to keep it permanently.')
     return ConversationHandler.END
@@ -56,8 +60,8 @@ def main():
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={
-            FILE_UPLOAD: [MessageHandler(Filters.document, handle_document)],
-            FILE_CONFIRM: [MessageHandler(Filters.text, done)],
+            FILE_UPLOAD: [MessageHandler(filters.Document, handle_document)],
+            FILE_CONFIRM: [MessageHandler(filters.Text, done)],
         },
         fallbacks=[CommandHandler('start', handle_start)]
     )
@@ -73,3 +77,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    
