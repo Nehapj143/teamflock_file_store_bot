@@ -1,4 +1,4 @@
-APScheduler
+APScheduler==3.10.4
 certifi
 charset-normalizer
 click
