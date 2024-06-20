@@ -3,6 +3,8 @@
 # Activate the virtual environment
 source /opt/render/project/src/.venv/bin/activate
 
+pip install requests
+
 # Upgrade pip
 pip install --upgrade pip
 
