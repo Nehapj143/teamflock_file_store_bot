@@ -7,9 +7,9 @@ import threading
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', filename='user_data.log', filemode='a')
 
-TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN'
-CHANNEL_ID = '@your_channel_id'
-LOG_CHANNEL_ID = '@your_log_channel_id'
+TOKEN = '7167327959:AAFJ25AIsO9olQrSzV2OcM0YqY7yUzWekDQ'
+CHANNEL_ID = '-1001329275814'
+LOG_CHANNEL_ID = '-1002035396400'
 
 FILE_UPLOAD, FILE_CONFIRM, LINK_SHARE = range(3)
 
