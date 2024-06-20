@@ -2,7 +2,8 @@ import logging
 import asyncio
 from telegram import Bot, Update
 from telegram.constants import ParseMode
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackContext, ConversationHandler
+from telegram.ext import filters  # Import filters instead of Filters
 
 # Enable logging
 logging.basicConfig(
@@ -121,9 +122,9 @@ async def main() -> None:
     dispatcher = updater.dispatcher
 
     conv_handler = ConversationHandler(
-        entry_points=[MessageHandler(Filters.document, handle_document)],
+        entry_points=[MessageHandler(filters.DocumentFilter(), handle_document)],  # Using filters.DocumentFilter()
         states={
-            FILE_UPLOAD: [MessageHandler(Filters.document, handle_document)],
+            FILE_UPLOAD: [MessageHandler(filters.DocumentFilter(), handle_document)],
             FILE_CONFIRMATION: [CommandHandler('done', done)],
         },
         fallbacks=[CommandHandler('start', handle_start, pass_args=True)],
@@ -137,3 +138,4 @@ async def main() -> None:
 
 if __name__ == '__main__':
     asyncio.run(main())
+
