@@ -1,8 +1,8 @@
 import logging
 import os
 from telegram import Update, InputFile
-from telegram.constants import ParseMode  # Import ParseMode from telegram.constants
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ConversationHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackContext, ConversationHandler
+from telegram.ext.filters import Filters
 import uuid
 
 # Enable logging
@@ -14,8 +14,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Replace with your specific bot token and channel ID
-BOT_TOKEN = "7167327959:AAFJ25AIsO9olQrSzV2OcM0YqY7yUzWekDQ"
-CHANNEL_ID = "-1001329275814"
+BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"
+CHANNEL_ID = "YOUR_CHANNEL_ID_HERE"
 
 # Owners
 OWNERS = [6804487024, 930652019]
@@ -37,12 +37,12 @@ def start(update: Update, context: CallbackContext) -> None:
     """Send a welcome message with a thumbnail and start the bot"""
     user_id = update.message.from_user.id
     if user_id in OWNERS:
-        # Send the thumbnail image
+        # Send the thumbnail image with HTML formatting
         context.bot.send_photo(
             chat_id=update.message.chat_id,
             photo=START_THUMBNAIL_URL,
             caption=START_MESSAGE,
-            parse_mode=ParseMode.HTML  # Using ParseMode.HTML for HTML formatting
+            parse_mode='HTML'  # Using ParseMode.HTML for HTML formatting
         )
     else:
         update.message.reply_text('You are not authorized to use this bot.')
@@ -90,7 +90,8 @@ def done(update: Update, context: CallbackContext) -> None:
         update.message.reply_text(
             f'Files stored successfully! Share these links to access the files:\n'
             f'Telegram Bot: {bot_link}\n'
-            f'Render: {render_link}'
+            f'Render: {render_link}',
+            parse_mode='HTML'  # Using ParseMode.HTML for HTML formatting
         )
         
         # Clear user data
