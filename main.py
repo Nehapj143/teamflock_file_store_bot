@@ -1,6 +1,7 @@
 import logging
 import os
-from telegram import Update, ParseMode, InputFile
+from telegram import Update, InputFile
+from telegram.constants import ParseMode
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ConversationHandler
 import uuid
 
@@ -113,8 +114,8 @@ def main() -> None:
     conv_handler = ConversationHandler(
         entry_points=[MessageHandler(Filters.document, handle_document)],
         states={
-            FILE_UPLOAD: [MessageHandler(Filters.document, handle_document)],
-            FILE_CONFIRMATION: [CommandHandler('done', done)],
+            'FILE_UPLOAD': [MessageHandler(Filters.document, handle_document)],
+            'FILE_CONFIRMATION': [CommandHandler('done', done)],
         },
         fallbacks=[CommandHandler('start', start)],
     )
@@ -131,3 +132,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
+    
