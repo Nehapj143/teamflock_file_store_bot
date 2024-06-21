@@ -2,9 +2,6 @@
 
 # Activate the virtual environment
 
-
-pip install requests
-
 # Upgrade pip
 pip install --upgrade pip
 
